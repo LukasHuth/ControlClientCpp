@@ -1,0 +1,9 @@
+﻿  main.cpp
+C:\Users\lukas\source\repos\TCP_User_Client\UserClient1\main.cpp(10,1): warning C4326:  return type of 'main' should be 'int' instead of 'void'
+C:\Users\lukas\source\repos\TCP_User_Client\UserClient1\main.cpp(82,73): warning C4267:  'argument': conversion from 'size_t' to 'int', possible loss of data
+  Generating code
+  1 of 154 functions ( 0.6%) were compiled, the rest were copied from previous compilation.
+    0 functions were new in current compilation
+    0 functions had inline decision re-evaluated but remain unchanged
+  Finished generating code
+  UserClient1.vcxproj -> C:\Users\lukas\source\repos\TCP_User_Client\x64\Release\UserClient1.exe
