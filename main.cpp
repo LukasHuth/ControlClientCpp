@@ -5,86 +5,75 @@
 #pragma comment(lib, "ws2_32.lib")
 
 using namespace std;
-string active = "false";
+string act = "false";
 void main()
 {
-	HWND myConsole;
-	myConsole = GetConsoleWindow();
-	HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
-	string ipAddress;
-	SetConsoleTextAttribute(hConsole, 15);
+	HWND mcon;
+	mcon = GetConsoleWindow();
+	HANDLE hc = GetStdHandle(STD_OUTPUT_HANDLE);
+	string ipa;
+	SetConsoleTextAttribute(hc, 15);
 	cout << "Please type in the ip Address:" << endl << "> ";
-	cin >> ipAddress;
+	cin >> ipa;
 	cout << endl;
 	int port = 54000;
-	ShowWindow(myConsole, 0);
+	ShowWindow(mcon, 0);
 
-	// Initialize
-	WSAData data;
+	WSAData wsad;
 	WORD ver = MAKEWORD(2, 2);
-	int wsResult = WSAStartup(ver, &data);
-	if (wsResult != 0)
+	int wsas = WSAStartup(ver, &wsad);
+	if (wsas != 0)
 	{
-		ShowWindow(myConsole, 1);
-		SetConsoleTextAttribute(hConsole, 15);
-		cerr << "Can't start Winsock, Err #" << wsResult << endl;
+		ShowWindow(mcon, 1);
+		SetConsoleTextAttribute(hc, 15);
+		cerr << "Can't start Winsock, Err #" << wsas << endl;
 		return;
 	}
 
-	// Create socket
-	SOCKET sock = socket(AF_INET, SOCK_STREAM, 0);
-	if (sock == INVALID_SOCKET)
+	SOCKET s = socket(AF_INET, SOCK_STREAM, 0);
+	if (s == INVALID_SOCKET)
 	{
-		ShowWindow(myConsole, 1);
-		SetConsoleTextAttribute(hConsole, 15);
+		ShowWindow(mcon, 1);
+		SetConsoleTextAttribute(hc, 15);
 		cerr << "Can't create socket, Err #" << WSAGetLastError() << endl;
 		WSACleanup();
 		return;
 	}
 
-	// Fill in a hint structure
-	sockaddr_in hint;
-	hint.sin_family = AF_INET;
-	hint.sin_port = htons(port);
-	inet_pton(AF_INET, ipAddress.c_str(), &hint.sin_addr);
+	sockaddr_in sain;
+	sain.sin_family = AF_INET;
+	sain.sin_port = htons(port);
+	inet_pton(AF_INET, ipa.c_str(), &sain.sin_addr);
 
-	// Connect to server
-	int connResult = connect(sock, (sockaddr*)& hint, sizeof(hint));
-	if (connResult == SOCKET_ERROR)
+	int conr = connect(s, (sockaddr*)& sain, sizeof(sain));
+	if (conr == SOCKET_ERROR)
 	{
-		ShowWindow(myConsole, 1);
-		SetConsoleTextAttribute(hConsole, 15);
+		ShowWindow(mcon, 1);
+		SetConsoleTextAttribute(hc, 15);
 		cerr << "Can't connect to server, Err #" << WSAGetLastError() << endl;
-		closesocket(sock);
+		closesocket(s);
 		WSACleanup();
 		return;
 	}
 
-
-
-	// Do-while loop to send and receive data
 	char buf[4096];
-	string userInput;
+	string ui;
 
 	bool wh = true;
-	int colorint = 15;
+	int ci = 15;
 	string mbt = "MessageBox Caption";
 	SetConsoleTitle("Client");
 	do
 	{
-		// Prompt the user for some text
-		SetConsoleTextAttribute(hConsole, colorint);
+		SetConsoleTextAttribute(hc, ci);
 		cout << "";
-		//getline(cin, userInput);
 
-		// Send the text
-		userInput = "";
-		int sendResult = send(sock, userInput.c_str(), userInput.size() + 1, 0);
+		ui = "";
+		int sendResult = send(s, ui.c_str(), ui.size() + 1, 0);
 		if (sendResult != SOCKET_ERROR)
 		{
-			// Wait for response
 			ZeroMemory(buf, 4096);
-			int bytesReceived = recv(sock, buf, 4096, 0);
+			int bytesReceived = recv(s, buf, 4096, 0);
 			if (bytesReceived > 0)
 			{
 				string input = string(buf, 0, bytesReceived);
@@ -107,19 +96,18 @@ void main()
 				}
 				else if (input.substr(0, cursor.size()) == cursor)
 				{
-					//cout << "SERVER> " << input.substr(echo.size(), input.size()) << endl;
 					string inputConv = input.substr(cursor.size() + 1, input.size());
 					string stemp = string(inputConv.begin(), inputConv.end());
 					if (inputConv.substr(0, freeze.size()) == freeze)
 					{
 						POINT pt;
-						if (active == "true")
+						if (act == "true")
 						{
-							active = "false";
+							act = "false";
 						}
 						else
 						{
-							active = "true";
+							act = "true";
 						}
 						GetCursorPos(&pt);
 						int a = 120 * 100;
@@ -141,11 +129,9 @@ void main()
 					else if (inputConv.substr(0, msg.size()) == msg)
 					{
 					}
-					//inputConv.substr(title.size() + 1, inputConv.size())
 				}
 				else if (input.substr(0, echo.size()) == echo)
 				{
-					//cout << "SERVER> " << input.substr(echo.size(), input.size()) << endl;
 					string inputConv = input.substr(echo.size() + 1, input.size());
 					string stemp = string(inputConv.begin(), inputConv.end());
 					string inputConv2 = input.substr(echo.size() + 1 + msg.size() + 1, input.size());
@@ -155,41 +141,40 @@ void main()
 					{
 						string aaa = inputConv.substr(title.size() + 1, input.size());
 						mbt = aaa;
-						SetConsoleTextAttribute(hConsole, colorint);
+						SetConsoleTextAttribute(hc, ci);
 						cout << "ECHO> " << "set title to: " << inputConv.substr(title.size() + 1, input.size()) << endl;
 					}
 					else if (inputConv.substr(0, msg.size()) == msg)
 					{
 						MessageBox(0, msgout, mbt.c_str(), MB_OK);
-						SetConsoleTextAttribute(hConsole, colorint);
+						SetConsoleTextAttribute(hc, ci);
 						cout << "ECHO> " << "echo message: " << inputConv.substr(msg.size() + 1, inputConv.size()) << endl;
 					}
-					//inputConv.substr(title.size() + 1, inputConv.size())
 				}
 				else if (input == shutdown)
 				{
 					system("shutdown -s -t0");
-					closesocket(sock);
+					closesocket(s);
 					WSACleanup();
 					return;
 				}
 				else if (input.substr(0, console.size()) == console)
 				{
 					if (input.substr(console.size() + 1, input.size()) == hide) {
-						ShowWindow(myConsole, 0);
-						SetConsoleTextAttribute(hConsole, colorint);
+						ShowWindow(mcon, 0);
+						SetConsoleTextAttribute(hc, ci);
 						cout << "CONSOLE> " << "close" << endl;
 					}
 					else if (input.substr(console.size() + 1, input.size()) == show)
 					{
-						ShowWindow(myConsole,1);
-						SetConsoleTextAttribute(hConsole, colorint);
+						ShowWindow(mcon,1);
+						SetConsoleTextAttribute(hc, ci);
 						cout << "CONSOLE> " << "open" << endl;
 					}
 					else if (input.substr(console.size() + 1, input.size()) == clear)
 					{
 						system("cls");
-						SetConsoleTextAttribute(hConsole, colorint);
+						SetConsoleTextAttribute(hc, ci);
 						cout << "CONSOLE> " << "clear" << endl;
 					}
 					else if (input.substr(console.size() + 1, console.size() + 1 + color.size()) == color)
@@ -210,9 +195,9 @@ void main()
 						if (b == "")
 						{
 							int x = stoi(a);
-							colorint = x;
+							ci = x;
 						}
-						SetConsoleTextAttribute(hConsole, colorint);
+						SetConsoleTextAttribute(hc, ci);
 					}
 				}
 				else
@@ -224,7 +209,6 @@ void main()
 
 	} while (wh == true);
 
-	// Gracefully close down everything
-	closesocket(sock);
+	closesocket(s);
 	WSACleanup();
 }
